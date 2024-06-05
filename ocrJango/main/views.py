@@ -24,8 +24,13 @@ def processCutImg(request):
         fs = FileSystemStorage(location='image', base_url='image')
         filename = fs.save(myfile.name, myfile)
         uploaded_file_url = fs.url(filename)
-        return render(request, 'ocrJango/helloworld.html', {
-            'uploaded_file_url': uploaded_file_url
-        })
+        image_path = 'image/' + filename
+        # 파일 읽기
+        with open(image_path, 'rb') as image_file:
+            image_data = image_file.read()
+
+        response = HttpResponse(image_data, content_type='image/jpeg')
+        response['Content-Disposition'] = f'inline; filename="{filename}"'
+        return response
         
     return render(request, 'ocrJango/helloworld.html')

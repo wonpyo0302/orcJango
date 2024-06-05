@@ -73,6 +73,10 @@
         <img class="preview">
     </div>
     <button onclick="processCutImg()">문서 경계 인식</button>
+    <div style="margin: 15px 0;">
+        <h4>결과물</h4>
+        <img class="responseImg">
+    </div>
 
 </body>
 
@@ -94,23 +98,27 @@
 
     function processCutImg() {
         let form = document.querySelector('#imgForm'); // 폼 태그 생성
-        // let file = document.querySelector('#file');
         let formData = new FormData(form);
 
-        $.ajax({
-            url : '/processCutImg',
-            type : 'POST',
-            data : formData,
-            contentType : false,
-            processData : false
-        }).done(function(data){
-            console.log(data);
-            // let preview = document.querySelector('.preview');
-            // const reader = new FileReader();
-            // reader.onload = ({ target }) => {
-            //     preview.src = target.result;
-            // };
-            // reader.readAsDataURL(file.files[0]);
+        // ajax는 native 타입의 response를 support하지 않음
+        fetch("/processCutImg", {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            const responseImg = document.querySelector('.responseImg');
+            const objectURL = URL.createObjectURL(blob);
+            responseImg.src = objectURL;
+            responseImg.style.display = 'block';
+        })
+        .catch(error => {
+            console.error('There has been a problem with your fetch operation:', error);
         });
     }
 </script>
