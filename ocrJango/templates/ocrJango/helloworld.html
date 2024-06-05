@@ -6,11 +6,112 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>template test</title>
+    <style>
+        button {
+            display: inline-block;
+            padding: 10px 10px;
+            color: #fff;
+            vertical-align: middle;
+            background-color: #999999;
+            cursor: pointer;
+            height: 40px;
+            text-align: center;
+            border: 1px solid #dddddd;
+        }
+
+        .filebox {
+            max-width: 600px;
+        }
+        .filebox .upload-name {
+            display: inline-block;
+            height: 40px;
+            padding: 0 10px;
+            vertical-align: middle;
+            border: 1px solid #dddddd;
+            width: 60%;
+            color: #999999;
+        }
+        .filebox label {
+            display: inline-block;
+            padding: 10px 10px;
+            color: #fff;
+            vertical-align: middle;
+            background-color: #999999;
+            cursor: pointer;
+            height: 20px;
+            width: 20%;
+            margin-left: 10px;
+            text-align: center;
+        }
+
+        img.preview {
+            max-width: 600px;
+        }
+        /* 기본 input 박스 스타일 없애기 */
+        .filebox input[type="file"] {
+            position: absolute;
+            width: 0;
+            height: 0;
+            padding: 0;
+            overflow: hidden;
+            border: 0;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 
     <h1>Hello World !!</h1>
-    <h1>반갑습니다 !!</h1>
+    <div class="filebox">
+        <form id='imgForm' enctype="multipart/form-data">{% csrf_token %}
+            <input class="upload-name" placeholder="이미지 파일을 업로드해주세요" readonly >
+            <input type="file" id="file" name="file" accept="image/png, image/jpeg" multiple="false"/>
+            <label for="file">파일 찾기</label> 
+        </form>
+    </div>
+    <div style="margin: 15px 0;">
+        <img class="preview">
+    </div>
+    <button onclick="processCutImg()">문서 경계 인식</button>
 
 </body>
+
+<script>
+    // 이미지 업로드시 
+    $("#file").on('change',function(){
+        let fileDom = document.querySelector('#file');
+        let fileName = fileDom.val;
+        $(".upload-name").val(fileName);
+
+        // 이미지 미리보기
+        let preview = document.querySelector('.preview');
+        const reader = new FileReader();
+        reader.onload = ({ target }) => {
+            preview.src = target.result;
+        };
+        reader.readAsDataURL(file.files[0]);
+    });
+
+    function processCutImg() {
+        let form = document.querySelector('#imgForm'); // 폼 태그 생성
+        // let file = document.querySelector('#file');
+        let formData = new FormData(form);
+
+        $.ajax({
+            url : '/processCutImg',
+            type : 'POST',
+            data : formData,
+            contentType : false,
+            processData : false
+        }).done(function(data){
+            console.log(data);
+            // let preview = document.querySelector('.preview');
+            // const reader = new FileReader();
+            // reader.onload = ({ target }) => {
+            //     preview.src = target.result;
+            // };
+            // reader.readAsDataURL(file.files[0]);
+        });
+    }
+</script>
 </html>
