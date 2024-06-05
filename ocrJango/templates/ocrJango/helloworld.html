@@ -6,10 +6,35 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>template test</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 
     <h1>Hello World !!</h1>
+    <div>
+        <textarea id="valueBox" style="width: 1264px; height: 400px;"></textarea>
+    </div>
+    <button id="ajaxBtn">통신테스트</button>
+
+    <div id="summaryAnswerArea"></div>
 
 </body>
+
+<script>
+    document.getElementById("ajaxBtn").addEventListener('click',()=>{
+        data = {
+            "contents" : document.getElementById("valueBox").value
+        };
+        $.ajax({
+            url:'checkdata',
+            type:'POST',
+            data:JSON.stringify(data),
+            contentType:'application/json',
+            success:function(res) {
+                console.log("data pass success",res);
+                document.getElementById("summaryAnswerArea").innerText = res.result
+            }
+        })
+    })
+</script>
 </html>
