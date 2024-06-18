@@ -44,7 +44,8 @@
             text-align: center;
         }
 
-        img.preview {
+        img.preview,
+        img.responseImg {
             max-width: 600px;
         }
         /* 기본 input 박스 스타일 없애기 */
@@ -73,14 +74,22 @@
         <img class="preview">
     </div>
     <button onclick="processCutImg()">문서 경계 인식</button>
+    <button onclick="processOcrImg()">O C R</button>
     <div style="margin: 15px 0;">
         <h4>결과물</h4>
+        <p class="ocrIng" style="display: none;">OCR 진행 중 입니다.</p>
         <img class="responseImg">
+        <p class="textResult"></p>
     </div>
 
 </body>
 
 <script>
+    // CSRF 토큰
+    $.ajaxSetup({
+        headers: { "X-CSRFToken": '{{csrf_token}}' }
+    });
+
     // 이미지 업로드시 
     $("#file").on('change',function(){
         let fileDom = document.querySelector('#file');
@@ -120,6 +129,29 @@
         .catch(error => {
             console.error('There has been a problem with your fetch operation:', error);
         });
+    }
+
+    function processOcrImg() {
+        let imgName = "";
+        let data = {
+            imgName : imgName
+        };
+
+        $('.ocrIng').css("display", "block")
+
+        $.ajax({
+            url: '/processOcrImg',
+            method: 'post',
+            data : JSON.stringify(data),
+            success: function (data, status, xhr) {
+                $('.ocrIng').css("display", "none")
+                $('.textResult').text(data.data)
+            },
+            error: function (data, status, err) {
+            },
+        })
+
+
     }
 </script>
 </html>
