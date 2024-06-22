@@ -79,8 +79,14 @@
         <h4>결과물</h4>
         <p class="ocrIng" style="display: none;">OCR 진행 중 입니다.</p>
         <img class="responseImg">
-        <p class="textResult"></p>
     </div>
+
+    <div>
+        <textarea id="valueBox" style="width: 1264px; height: 400px;"></textarea>
+    </div>
+    <button id="ajaxBtn">통신테스트</button>
+
+    <div id="summaryAnswerArea"></div>
 
 </body>
 
@@ -145,13 +151,28 @@
             data : JSON.stringify(data),
             success: function (data, status, xhr) {
                 $('.ocrIng').css("display", "none")
-                $('.textResult').text(data.data)
+                $('#valueBox').text(data.data)
             },
             error: function (data, status, err) {
             },
         })
-
-
     }
+    
+    
+    document.getElementById("ajaxBtn").addEventListener('click',()=>{
+        data = {
+            "contents" : document.getElementById("valueBox").value
+        };
+        $.ajax({
+            url:'checkdata',
+            type:'POST',
+            data:JSON.stringify(data),
+            contentType:'application/json',
+            success:function(res) {
+                console.log("data pass success",res);
+                document.getElementById("summaryAnswerArea").innerText = res.result
+            }
+        })
+    })
 </script>
 </html>
