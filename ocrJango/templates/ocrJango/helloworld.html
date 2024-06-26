@@ -57,6 +57,66 @@
             overflow: hidden;
             border: 0;
         }
+
+        .switch-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .switch-label {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .language-label {
+            margin-left: 10px;
+            font-size: 1.2em;
+        }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
@@ -81,16 +141,26 @@
         <img class="responseImg">
     </div>
 
+    <div class="switch-container">
+        <span class="switch-label">번역언어</span>
+        <label class="switch">
+            <input type="checkbox" id="languageSwitch">
+            <span class="slider"></span>
+        </label>
+        <span class="language-label">KR</span>
+    </div>
     <div>
         <textarea id="valueBox" style="width: 1264px; height: 400px;"></textarea>
     </div>
     <button id="ajaxBtn">통신테스트</button>
-
-    <div id="summaryAnswerArea"></div>
+    
+    <textarea id="summaryAnswerArea" style="width: 1264px; height: 400px;"></textarea>
 
 </body>
 
 <script>
+    const languageSwitch = document.getElementById('languageSwitch');
+    const languageLabel = document.querySelector('.language-label');
     // CSRF 토큰
     $.ajaxSetup({
         headers: { "X-CSRFToken": '{{csrf_token}}' }
@@ -161,6 +231,7 @@
     
     document.getElementById("ajaxBtn").addEventListener('click',()=>{
         data = {
+            "lang" : languageLabel.textContent,
             "contents" : document.getElementById("valueBox").value
         };
         $.ajax({
@@ -170,9 +241,19 @@
             contentType:'application/json',
             success:function(res) {
                 console.log("data pass success",res);
-                document.getElementById("summaryAnswerArea").innerText = res.result
+                document.getElementById("summaryAnswerArea").value = res.result
             }
         })
     })
+
+    languageSwitch.addEventListener('change', () => {
+        if (languageSwitch.checked) {
+            languageLabel.textContent = 'EN';
+            alert('Language switched to English');
+        } else {
+            languageLabel.textContent = 'KR';
+            alert('번역언어가 한국어로 변경되었습니다');
+        }
+    });
 </script>
 </html>

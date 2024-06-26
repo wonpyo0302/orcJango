@@ -25,11 +25,16 @@ def checkdata(request):
     )
     jsonObj = json.loads(request.body)
 
-    messages = [
-        {"role": "system", "content": "You are a helpful assistant in the summary"},
-        {"role": "user", "content": f"Summarize the following. \n {jsonObj.get('contents')}"}
-    ]
-
+    if jsonObj.get('lang') == 'EN':
+        messages = [
+            {"role": "system", "content": "You are a helpful assistant in the summary"},
+            {"role": "user", "content": f"Summarize the following. \n {jsonObj.get('contents')}"}
+        ]
+    else:
+        messages = [
+            {"role": "system", "content": "You are a helpful assistant in the summary"},
+            {"role": "user", "content": f"다음의 내용을 한국어로 요약해줘. \n {jsonObj.get('contents')}"}
+        ]
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=messages,
