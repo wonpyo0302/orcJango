@@ -77,6 +77,59 @@
             font-size: 1.2em;
         }
     </style>
+    <style>
+        button {
+            display: inline-block;
+            padding: 10px 10px;
+            color: #fff;
+            vertical-align: middle;
+            background-color: #999999;
+            cursor: pointer;
+            height: 40px;
+            text-align: center;
+            border: 1px solid #dddddd;
+        }
+
+        .filebox {
+            max-width: 600px;
+        }
+        .filebox .upload-name {
+            display: inline-block;
+            height: 40px;
+            padding: 0 10px;
+            vertical-align: middle;
+            border: 1px solid #dddddd;
+            width: 60%;
+            color: #999999;
+        }
+        .filebox label {
+            display: inline-block;
+            padding: 10px 10px;
+            color: #fff;
+            vertical-align: middle;
+            background-color: #999999;
+            cursor: pointer;
+            height: 20px;
+            width: 20%;
+            margin-left: 10px;
+            text-align: center;
+        }
+
+        img.preview,
+        img.responseImg {
+            max-width: 600px;
+        }
+        /* 기본 input 박스 스타일 없애기 */
+        .filebox input[type="file"] {
+            position: absolute;
+            width: 0;
+            height: 0;
+            padding: 0;
+            overflow: hidden;
+            border: 0;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     <div>
@@ -101,8 +154,26 @@
     </div>
     <div>
         <textarea id="summaryAnswerArea" style="width: 1264px; height: 400px;"></textarea>
+    <h1>Hello World !!</h1>
+    <div class="filebox">
+        <form id='imgForm' enctype="multipart/form-data">{% csrf_token %}
+            <input class="upload-name" placeholder="이미지 파일을 업로드해주세요" readonly >
+            <input type="file" id="file" name="file" accept="image/png, image/jpeg" multiple="false"/>
+            <label for="file">파일 찾기</label> 
+        </form>
     </div>
-
+    <div style="margin: 15px 0;">
+        <img class="preview">
+    </div>
+    <button onclick="processCutImg()">문서 경계 인식</button>
+    <button onclick="processOcrImg()">O C R</button>
+    <div style="margin: 15px 0;">
+        <h4>결과물</h4>
+        <p class="ocrIng" style="display: none;">OCR 진행 중 입니다.</p>
+        <img class="responseImg">
+        <p class="textResult"></p>
+    </div>
+    </div>
 </body>
 
 <script>
@@ -135,5 +206,75 @@
             alert('번역언어가 한국어로 변경되었습니다');
         }
     });
+=======
+    // CSRF 토큰
+    $.ajaxSetup({
+        headers: { "X-CSRFToken": '{{csrf_token}}' }
+    });
+
+    // 이미지 업로드시 
+    $("#file").on('change',function(){
+        let fileDom = document.querySelector('#file');
+        let fileName = fileDom.val;
+        $(".upload-name").val(fileName);
+
+        // 이미지 미리보기
+        let preview = document.querySelector('.preview');
+        const reader = new FileReader();
+        reader.onload = ({ target }) => {
+            preview.src = target.result;
+        };
+        reader.readAsDataURL(file.files[0]);
+    });
+
+    function processCutImg() {
+        let form = document.querySelector('#imgForm'); // 폼 태그 생성
+        let formData = new FormData(form);
+
+        // ajax는 native 타입의 response를 support하지 않음
+        fetch("/processCutImg", {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            const responseImg = document.querySelector('.responseImg');
+            const objectURL = URL.createObjectURL(blob);
+            responseImg.src = objectURL;
+            responseImg.style.display = 'block';
+        })
+        .catch(error => {
+            console.error('There has been a problem with your fetch operation:', error);
+        });
+    }
+
+    function processOcrImg() {
+        let imgName = "";
+        let data = {
+            imgName : imgName
+        };
+
+        $('.ocrIng').css("display", "block")
+
+        $.ajax({
+            url: '/processOcrImg',
+            method: 'post',
+            data : JSON.stringify(data),
+            success: function (data, status, xhr) {
+                $('.ocrIng').css("display", "none")
+                $('.textResult').text(data.data)
+            },
+            error: function (data, status, err) {
+            },
+        })
+
+
+    }
+>>>>>>> jpan/v1
 </script>
 </html>
